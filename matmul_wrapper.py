@@ -30,6 +30,13 @@ _lib.matmul_tiled.argtypes = [
     ctypes.c_int, ctypes.c_int, ctypes.c_int
 ]
 
+_lib.matmul_kp.argtypes = [
+    np.ctypeslib.ndpointer(dtype=np.float32, ndim=2, flags='C_CONTIGUOUS'),
+    np.ctypeslib.ndpointer(dtype=np.float32, ndim=2, flags='C_CONTIGUOUS'),
+    np.ctypeslib.ndpointer(dtype=np.float32, ndim=2, flags='C_CONTIGUOUS'),
+    ctypes.c_int, ctypes.c_int, ctypes.c_int
+]
+
 def matmul(A, B, implementation='avx'):
     """
     Perform optimized matrix multiplication C = A * B
@@ -70,13 +77,15 @@ def matmul(A, B, implementation='avx'):
         _lib.matmul_transposed(A, B, C, m, k, n)
     elif implementation == 'tiled':
         _lib.matmul_tiled(A, B, C, m, k, n)
+    elif implementation == 'matmul_kp':
+        _lib.matmul_kp(A,B,C,m,k,n)
     else:
         raise ValueError(f"Unknown implementation: {implementation}")
     
     return C
 
-def benchmark(sizes=[(100, 100, 100), (500, 500, 500), (1000, 1000, 1000)], 
-              implementations=['avx', 'transposed', 'tiled', 'numpy']):
+def benchmark(sizes=[(128, 128, 128), (512, 512, 512), (1024, 1024, 1024)], 
+              implementations=['avx', 'transposed', 'tiled', 'numpy', 'matmul_kp']):
     """
     Benchmark different matrix multiplication implementations
     
@@ -136,8 +145,8 @@ if __name__ == "__main__":
     results = benchmark()
     
     # Find the best implementation for each size
-    for size in [(100, 100, 100), (500, 500, 500), (1000, 1000, 1000)]:
+    for size in [(128, 128, 128), (512, 512, 512), (1024, 1024, 1024)]:
         best_impl = min([(impl, results[(size[0], size[1], size[2], impl)]) 
-                         for impl in ['avx', 'transposed', 'tiled', 'numpy']], 
+                         for impl in ['avx', 'transposed', 'tiled', 'numpy', 'matmul_kp']], 
                         key=lambda x: x[1])
         print(f"Best implementation for size {size}: {best_impl[0]} ({best_impl[1]:.4f} seconds)")

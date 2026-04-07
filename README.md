@@ -20,11 +20,15 @@ This repository contains optimized matrix multiplication code specifically tuned
 ## Installation
 
 1. Clone this repository:
+```bash
 git clone https://github.com/Shubhajeetgithub/optimized-matmul.git
 cd optimized-matmul
+```
 
 2. Compile the C++ code:
+```bash
 g++ -O3 -march=alderlake -mavx2 -ffast-math -fopenmp -shared -fPIC matmul.cpp -o matmul.so
+```
 
 ## Usage
 
